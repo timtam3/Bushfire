@@ -1,7 +1,6 @@
 
 # Load library
 library(shiny)
-library(shiny)
 library(dplyr)
 library(leaflet)
 library(readr)
