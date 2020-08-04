@@ -1,0 +1,68 @@
+
+
+library(shiny)
+library(shiny)
+library(dplyr)
+library(leaflet)
+
+if (interactive()) {
+    # User interface ----
+    ui <- fluidPage(
+        titlePanel("VICfire"),
+        
+        sidebarLayout(
+            sidebarPanel(
+                helpText("Create demographic maps of fire in Victoria"),
+                
+                selectInput("year", label = "Choose Year",
+                            choices = c("Any", levels(factor(mydata$year))),selected = "any"),
+                selectInput("reason", label = "Choose Reason:",
+                            choices = c("Any",levels(factor(mydata$new_cause))), selected = "any"),
+                
+                selectInput("month", label = "Choose Month:",
+                            choices = c("Any",levels(factor(mydata$month))), selected = "any")
+            ),
+            
+            mainPanel(
+                leafletOutput(outputId = "map")
+            )
+        )
+    )
+    
+    # Server logic ----
+    server <- function(input, output) {
+        
+        pal <- colorFactor(pal = c("#FF0000","#0000FF","#006400","#e1f705", "#800000","#f705de"), domain = c("arson","lightning","burning_off_human","acidental_human","relight","other"))
+        
+        dataselected <- reactive({
+            if(input$year =="Any" & input$reason!="Any" & input$month!="Any"){mydata <- subset(mydata, month == input$month & new_cause == input$reason)}
+            else if(input$reason =="Any"& input$year !="Any"  & input$month!="Any"){mydata <- subset(mydata, month == input$month & year == input$year)}
+            else if(input$month =="Any"& input$year !="Any" & input$reason!="Any"){mydata <- subset(mydata, new_cause == input$reason & year == input$year)}
+            else if(input$year =="Any" & input$reason=="Any" & input$month!="Any"){mydata <- subset(mydata, month == input$month)}
+            else if(input$year =="Any" & input$reason!="Any" & input$month=="Any"){mydata <- subset(mydata, new_cause == input$reason)}
+            else if(input$year !="Any" & input$reason=="Any" & input$month=="Any"){mydata <- subset(mydata, year == input$year)}
+            else if(input$year =="Any" & input$reason=="Any" & input$month=="Any"){mydata}
+            
+            else{
+                mydata <- subset(mydata, year == input$year & month==input$month & new_cause == input$reason)}
+            
+        }) 
+        
+        
+        output$map <- renderLeaflet({
+            leaflet() %>% 
+                addTiles() %>%
+                addCircleMarkers(data = dataselected(), lat =  ~lat, lng =~lon, 
+                                 radius = 0.5, 
+                                 color = ~pal(new_cause),
+                                 stroke = TRUE, fillOpacity = 2)%>%
+                addLegend(pal=pal, values=mydata$new_cause) %>%
+                setView(lng= 144.7852, lat = -37.4913 , zoom = 6)
+        })
+    }
+    
+    
+    # Run app ----
+    shinyApp(ui, server)
+    
+}
