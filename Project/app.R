@@ -1,9 +1,11 @@
 
-
+# Load library
 library(shiny)
 library(shiny)
 library(dplyr)
 library(leaflet)
+
+# Load in training data
 mydata <- read_csv("mydata.csv")
 
 
