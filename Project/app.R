@@ -4,6 +4,9 @@ library(shiny)
 library(shiny)
 library(dplyr)
 library(leaflet)
+mydata <- read_csv("mydata.csv")
+
+
 
 if (interactive()) {
     # User interface ----
