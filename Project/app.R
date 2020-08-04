@@ -4,6 +4,7 @@ library(shiny)
 library(shiny)
 library(dplyr)
 library(leaflet)
+library(readr)
 
 # Load in training data
 mydata <- read_csv("mydata.csv")
