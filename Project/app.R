@@ -51,6 +51,7 @@ if (interactive()) {
                 
                 selectInput("year", label = "Choose Year",
                             choices = c("Any", levels(factor(mydata$year))),selected = "Any"),
+                
                 checkboxGroupInput("reason", label = "Choose Reason:",
                                    choices = levels(factor(mydata$new_cause)), selected = "Any"),
                 
@@ -84,28 +85,37 @@ if (interactive()) {
         
         dataselected <- reactive({if(is.null(input$reason)){mydata <- subset(dataselected_2(), new_cause == 1)}
             else{mydata <- dataselected_2() %>% filter(new_cause %in% input$reason )}
-            })
+        })
         
+        #filtered <- reactive({dataselected()[dataselected()$year >= input$range[1] & dataselected()$year <= input$range[2],]})
        
-        
-        
         output$map <- renderLeaflet({
             leaflet() %>% 
                 addTiles() %>%
                 addLegend(pal=pal, values=mydata$new_cause) %>%
-                setView(lng= 144.7852, lat = -36.3913 , zoom = 6) %>%
+                addLayersControl(overlayGroups =c("all fire","arson","lightning"))%>%
+                setView(lng= 144.7852, lat = -36.3913 , zoom = 6)%>%
+                addPolygons(data=dd3,group = "all fire",col="#56B4E9")%>%
+                addPolygons(data=dd3_arson,group = "arson",col="#000000")%>%
+                addPolygons(data=dd3_lightning,group = "lightning",weight=1 ,col="#009E73")%>%
+                hideGroup(c("all fire","arson","lightning"))
+        
+        })
+        
+        observe({leafletProxy("map") %>%
+            clearMarkers()%>%
             addCircleMarkers(data = dataselected(), lat =  ~lat, lng =~lon, 
                              radius = 2, 
                              color = ~pal(new_cause),
-                             stroke = FALSE, fillOpacity = 20) %>%
-                addCircleMarkers(data = mydata1, lat =  ~lat, lng =~lon, 
-                                 radius = 2, color="#56B4E9",
-                                 stroke = FALSE, fillOpacity = 0.2, group="all fire")%>%
-                addPolygons(data=dd3,group = "fire",col="#56B4E9")%>%
-                addPolygons(data=dd3_arson,group = "arson",col="#000000")%>%
-                addPolygons(data=dd3_lightning,group = "lightning",col="#009E73")%>%
-                addLayersControl(overlayGroups =c("all fire","fire","arson","lightning"))
+                             stroke = FALSE, fillOpacity = 20)
+
+            
         })
+        
+            
+        
+            
+        
     }
     
     # Run app ----
