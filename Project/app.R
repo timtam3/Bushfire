@@ -95,9 +95,9 @@ if (interactive()) {
                 addLegend(pal=pal, values=mydata$new_cause) %>%
                 addLayersControl(overlayGroups =c("all fire","arson","lightning"))%>%
                 setView(lng= 144.7852, lat = -36.3913 , zoom = 6)%>%
-                addPolygons(data=dd3,group = "all fire",col="#56B4E9")%>%
+                addPolygons(data=dd3,group = "all fire",weight=1,col="#56B4E9")%>%
                 addPolygons(data=dd3_arson,group = "arson",col="#000000")%>%
-                addPolygons(data=dd3_lightning,group = "lightning",weight=1 ,col="#009E73")%>%
+                addPolygons(data=dd3_lightning,group = "lightning",weight=1,col="#009E73")%>%
                 hideGroup(c("all fire","arson","lightning"))
         
         })
