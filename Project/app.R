@@ -5,6 +5,8 @@ library(dplyr)
 library(leaflet)
 library(readr)
 library(KernSmooth)
+library(shinyWidgets)
+
 
 # Load in training data
 mydata <- read_csv("mydata.csv")
@@ -46,24 +48,37 @@ if (interactive()) {
         navbarPage("VICfire", id="main",
                    
 
-        tabPanel("Historical data map",
+        tabPanel("Historical data map",strong("Buscador"),value="panel2",
+                 tags$head(tags$style(HTML(".multicol{font-size:12px;
+                                                  height:auto;
+                                                  -webkit-column-count: 2;
+                                                  -moz-column-count: 2;
+                                                  column-count: 2;
+                                                  }
+
+                                                  div.checkbox {margin-top: 0px;}"))),
         
         sidebarLayout(
             sidebarPanel(
                 helpText("Create demographic maps of fire in Victoria"),
                 
-                selectInput("year", label = "Choose Year",
-                            choices = c("Any", levels(factor(mydata$year))),selected = "Any"),
+                sliderInput("year", label = "Choose Year",
+                            value = c(2010,2017),min = min(mydata$year), max=max(mydata$year),step = 1),
                 
                 checkboxGroupInput("reason", label = "Choose Reason:",
                                    choices = levels(factor(mydata$new_cause)), selected = "Any"),
                 
-                selectInput("month", label = "Choose Month:",
-                            choices = c("Any",levels(factor(mydata$month))), selected = "Any")
+                checkboxGroupButtons("month", label = "Choose Month:",
+                            choices = c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"), individual = TRUE,
+                            checkIcon = list(
+                                yes = tags$i(class = "fa fa-circle", 
+                                             style = "color: steelblue",),
+                                no = tags$i(class = "fa fa-circle-o", 
+                                            style = "color: steelblue")))
             ),
             
             mainPanel(
-                leafletOutput(outputId = "map")
+                leafletOutput(outputId = "map",height=450)
             )
         )
     ),
@@ -82,15 +97,11 @@ if (interactive()) {
         pal <- colorFactor(pal = c("#E69F00","#000000","#0072B2","#009E73", "#F0E442","#CC79A7"), domain = c("arson","lightning","burning_off_human","acidental_human","relight","other"))
         
         dataselected_1 <- reactive({
-            if(input$year =="Any"){mydata <- mydata}
-            else{
-                mydata <- subset(mydata, year == input$year)}
+            mydata <- subset(mydata,year >= input$year[1] & year <= input$year[2])
         }) 
         
         dataselected_2 <- reactive({
-            if(input$month =="Any"){mydata <- dataselected_1()}
-            else{
-                mydata <- subset(dataselected_1(), month == input$month)}
+                mydata <- subset(dataselected_1(), month %in% input$month)
         }) 
         
         
