@@ -41,6 +41,20 @@ dd2_lightning <- sapply(1:length(lines_lightning),function(i) Polygons(list(dd1_
 poly_data_lightning <- data.frame(Value = sapply(1:length(lines_lightning),function(i) lines_lightning[[i]]$level))
 dd3_lightning <- SpatialPolygonsDataFrame(SpatialPolygons(dd2_lightning),data = poly_data_lightning)
 
+d2d_burning <- bkde2D(cbind(burningdata$lon,burningdata$lat),bandwidth=c(0.15,0.15))
+lines_burning<- contourLines(d2d_burning$x1,d2d_burning$x2,d2d_burning$fhat)
+dd1_burning <- sapply(1:length(lines_burning),function(i) Polygon(as.matrix(cbind(lines_burning[[i]]$x,lines_burning[[i]]$y))))
+dd2_burning <- sapply(1:length(lines_burning),function(i) Polygons(list(dd1_burning[[i]]),i))
+poly_data_burning <- data.frame(Value = sapply(1:length(lines_burning),function(i) lines_burning[[i]]$level))
+dd3_burning <- SpatialPolygonsDataFrame(SpatialPolygons(dd2_burning),data = poly_data_burning)
+
+d2d_accident <- bkde2D(cbind(accidentdata$lon,accidentdata$lat),bandwidth=c(0.15,0.15))
+lines_accident<- contourLines(d2d_accident$x1,d2d_accident$x2,d2d_accident$fhat)
+dd1_accident <- sapply(1:length(lines_accident),function(i) Polygon(as.matrix(cbind(lines_accident[[i]]$x,lines_accident[[i]]$y))))
+dd2_accident <- sapply(1:length(lines_accident),function(i) Polygons(list(dd1_accident[[i]]),i))
+poly_data_accident <- data.frame(Value = sapply(1:length(lines_accident),function(i) lines_accident[[i]]$level))
+dd3_accident <- SpatialPolygonsDataFrame(SpatialPolygons(dd2_accident),data = poly_data_accident)
+
 
 if (interactive()) {
     # User interface ----
@@ -48,15 +62,8 @@ if (interactive()) {
         navbarPage("VICfire", id="main",
                    
 
-        tabPanel("Historical data map",strong("Buscador"),value="panel2",
-                 tags$head(tags$style(HTML(".multicol{font-size:12px;
-                                                  height:auto;
-                                                  -webkit-column-count: 2;
-                                                  -moz-column-count: 2;
-                                                  column-count: 2;
-                                                  }
 
-                                                  div.checkbox {margin-top: 0px;}"))),
+        tabPanel("Historical data map",
         
         sidebarLayout(
             sidebarPanel(
@@ -69,12 +76,9 @@ if (interactive()) {
                                    choices = levels(factor(mydata$new_cause)), selected = "Any"),
                 
                 checkboxGroupButtons("month", label = "Choose Month:",
-                            choices = c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"), individual = TRUE,
-                            checkIcon = list(
-                                yes = tags$i(class = "fa fa-circle", 
-                                             style = "color: steelblue",),
-                                no = tags$i(class = "fa fa-circle-o", 
-                                            style = "color: steelblue")))
+                            choices = c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"),
+                            individual = TRUE,justified = FALSE,
+                            width = "100%")
             ),
             
             mainPanel(
@@ -109,18 +113,19 @@ if (interactive()) {
             else{mydata <- dataselected_2() %>% filter(new_cause %in% input$reason )}
         })
         
-        #filtered <- reactive({dataselected()[dataselected()$year >= input$range[1] & dataselected()$year <= input$range[2],]})
        
         output$map <- renderLeaflet({
             leaflet() %>% 
                 addTiles() %>%
                 addLegend(pal=pal, values=mydata$new_cause) %>%
-                addLayersControl(overlayGroups =c("all fire","arson","lightning"))%>%
+                addLayersControl(overlayGroups =c("all fire","arson","lightning","burning","accident"))%>%
                 setView(lng= 144.7852, lat = -36.3913 , zoom = 6)%>%
                 addPolygons(data=dd3,group = "all fire",weight=1,col="#56B4E9")%>%
                 addPolygons(data=dd3_arson,group = "arson",col="#000000")%>%
                 addPolygons(data=dd3_lightning, group = "lightning",weight=1,col="#009E73")%>%
-                hideGroup(c("all fire","arson","lightning"))
+                addPolygons(data=dd3_burning, group = "burning",weight=1,col="#0072B2")%>%
+                addPolygons(data=dd3_accident, group = "accident",weight=1,col="#E69F00")%>%
+                hideGroup(c("all fire","arson","lightning","burning","accident"))
         
         })
         
