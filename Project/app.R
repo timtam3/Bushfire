@@ -16,7 +16,7 @@ library(DT)
 
 
 # Load in training data
-mydata <- read_csv("mydata1.csv")
+mydata <- read_csv("mydata.csv")
 mydata1 <- mydata
 mydata2<- read_csv("mydata2.csv")
 mydata4<- read_csv("mydata4.csv")
