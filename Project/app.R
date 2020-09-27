@@ -16,12 +16,83 @@ library(DT)
 
 
 # Load in training data
-mydata <- read_csv("mydata.csv")
-mydata1 <- mydata
-mydata2<- read_csv("mydata2.csv")
-mydata4<- read_csv("mydata4.csv")
-prediction <- read_csv("prediction.csv")
-simulation <- read_csv("simulation.csv")
+ mydata <- read_csv("mydata.csv")
+ mydata1 <- mydata
+ mydata2<- read_csv("mydata2.csv")
+ mydata4<- read_csv("mydata4.csv")
+ prediction <- read_csv("prediction.csv")
+ simulation <- read_csv("simulation.csv")
+
+
+ratio1arson <- read_csv("ratio1arson.csv")
+ratio1accident <- read_csv("ratio1accident.csv")
+ratio1lightning <- read_csv("ratio1lightning.csv")
+ratio1burning_off <- read_csv("ratio1burning_off.csv")
+
+ratio2arson <- read_csv("ratio2arson.csv")
+ratio2accident <- read_csv("ratio2accident.csv")
+ratio2lightning <- read_csv("ratio2lightning.csv")
+ratio2burning_off <- read_csv("ratio2burning_off.csv")
+
+ratio3arson <- read_csv("ratio3arson.csv")
+ratio3accident <- read_csv("ratio3accident.csv")
+ratio3lightning <- read_csv("ratio3lightning.csv")
+ratio3burning_off <- read_csv("ratio3burning_off.csv")
+
+
+ratio10arson <- read_csv("ratio10arson.csv")
+ratio10accident <- read_csv("ratio10accident.csv")
+ratio10lightning <- read_csv("ratio10lightning.csv")
+ratio10burning_off <- read_csv("ratio10burning_off.csv")
+
+ratio11arson <- read_csv("ratio11arson.csv")
+ratio11accident <- read_csv("ratio11accident.csv")
+ratio11lightning <- read_csv("ratio11lightning.csv")
+ratio11burning_off <- read_csv("ratio11burning_off.csv")
+
+ratio12arson <- read_csv("ratio12arson.csv")
+ratio12accident <- read_csv("ratio12accident.csv")
+ratio12lightning <- read_csv("ratio12lightning.csv")
+ratio12burning_off <- read_csv("ratio12burning_off.csv")
+
+
+
+
+r1a<-ratio1arson
+r1ac<-ratio1accident
+r1l<-ratio1lightning
+r1b<-ratio1burning_off
+
+r2a<-ratio2arson
+r2b<-ratio2burning_off
+r2l<-ratio2lightning
+r2ac<-ratio2accident
+
+
+r3a<-ratio3arson
+r3b<-ratio3burning_off
+r3l<-ratio3lightning
+r3ac<-ratio3accident
+
+r10a<-ratio10arson
+r10b<-ratio10burning_off
+r10l<-ratio10lightning
+r10ac<-ratio10accident
+
+r11a<-ratio11arson
+r11b<-ratio11burning_off
+r11l<-ratio11lightning
+r11ac<-ratio11accident
+
+r12a<-ratio12arson
+r12b<-ratio12burning_off
+r12l<-ratio12lightning
+r12ac<-ratio12accident
+
+
+
+
+
 ystart = -39.08246
 yend = -34.03690
 xstart = 140.6923
@@ -94,12 +165,17 @@ if (interactive()) {
                                        sidebarLayout(
                                            sidebarPanel(
                                                helpText("Predicted demographic maps of fire in Victoria"),
-                                               checkboxGroupButtons("month1", label = "Choose Month:",
-                                                                    choices = c("Jan","Feb","Mar","Oct","Nov","Dec"),
+                                               checkboxGroupButtons("month1", label = "Choose Month for geographic plot:",
+                                                                    choices = c("Oct","Nov","Dec","Jan","Feb","Mar"),
                                                                     individual = TRUE,justified = FALSE,
                                                                     width = "100%"),
-                                               checkboxGroupInput("reason1", label = "Choose Reason:",
-                                                                  choices = levels(factor(prediction$new_cause)), selected = "Any")),
+                                               checkboxGroupInput("reason1", label = "Choose Reason for geographic plot:",
+                                                                  choices = levels(factor(prediction$new_cause)), selected = "Any"),
+                                               radioButtons("month2", label = "Choose Month for possibility plot:",
+                                                            choices = c("Oct","Nov","Dec","Jan","Feb","Mar"),selected = "Any"),
+                                               radioButtons("reason2", label = "Choose Reason for possibility polt:",
+                                                            choices = levels(factor(prediction$new_cause)), selected = "Any")
+                                               ),
                                            mainPanel(leafletOutput(outputId = "map2",height = 330),leafletOutput(outputId = "map3",height = 330))
                                            
                                        )),
@@ -132,13 +208,15 @@ if (interactive()) {
         )
     )
     
-    
     # Server logic ----
     server <- function(input, output) {
         
         pal <- colorFactor(pal = c("#E69F00","#000000","#0072B2","#009E73", "#F0E442","#CC79A7"), domain = c("arson","lightning","burningoff","accident","relight","other"))
         pal1 <- colorFactor(pal = c("#E69F00","#000000","#0072B2","#009E73"), domain = c("arson","lightning","burningoff","accident"))
-        
+        pal2 <- colorFactor(
+            palette = 'red',
+            domain = c(0,1)
+        )
         
         
         
@@ -164,60 +242,9 @@ if (interactive()) {
             else{pre_1() %>% filter(new_cause %in% input$reason1)}
         })
         
-        d2d <- bkde2D(cbind(mydata$lon,mydata$lat),bandwidth=c(.0045, .0068), gridsize = c(100,100))
-        # datasimulation <- simulation
-        # lonsimulation = datasimulation[,1]
-        # latsimulation = datasimulation[,2]
-        # numlonsimulation = length(lonsimulation)
-        # numlatsimulation = length(latsimulation)
-        # lat <- seq(ystart, yend, 0.1)
-        # lon <- seq(xstart, xend, 0.181)
-        # latsimulation_pos = rep(0, length(lat)-1)
-        # lonsimulation_pos = rep(0, length(lon)-1)
-        # 
-        # countsimulation = matrix(0,nrow = length(latsimulation_pos), ncol = length(lonsimulation_pos))
-        # for (i in 1:numlonsimulation){
-        #   print(i)
-        #   lonsimulation_1 = lonsimulation[i]
-        #   latsimulation_1 = latsimulation[i]
-        #   if ((latsimulation_1 >= min(lat)) && lonprediction_1>= min(lon)&& (lonsimulation_1 <= max(lon)) && (latsimulation_1 <= max(lat)))
-        #   {
-        #     lon_pos = max(which(lonsimulation_1 >= lon))
-        #     lat_pos = max(which(latsimulation_1 <= lat))
-        #     countsimulation[lat_pos,lon_pos] = countsimulation[lat_pos,lon_pos] + 1
-        #   }
-        # }
-        # 
-        # dataprediction <- prediction
-        # lonprediction = dataprediction[,2]
-        # latprediction = dataprediction[,3]
-        # numlonprediction = length(lonprediction)
-        # numlatprediction = length(latprediction)
-        # 
-        # countprediction = matrix(0,nrow = length(latsimulation_pos), ncol = length(lonsimulation_pos))
-        # for (i in 1:numlonprediction){
-        #   print(i)
-        #   lonprediction_1 = lonprediction[i]
-        #   latprediction_1 = latprediction[i]
-        #   if ((latprediction_1 >= min(lat)) && lonprediction_1>= min(lon) && (lonprediction_1 <= max(lon)) && (latprediction_1 <= max(lat)))
-        #   {lon_pos = max(which(lonprediction_1 >= lon))
-        #   lat_pos = max(which(latprediction_1 <= lat))
-        #   countprediction[lat_pos,lon_pos] = countprediction[lat_pos,lon_pos] + 1
-        #   }
-        # }
-        # ratio = countprediction/countsimulation
-        # ratio[is.nan(ratio)] = 0
-        # ratio[!is.finite(ratio)] = 0
-        # 
-        # 
-        # 
-        # ratio <- apply(ratio, 1, rev)
-        # ls <- list("x1" = x, "x2" = y, "fhat" = ratio)
-        # KernelDensityRaster <- raster(list(x=ls$x1 ,y=ls$x2 ,z = ls$fhat))
-        KernelDensityRaster <- raster(list(x=d2d$x1 ,y=d2d$x2 ,z = d2d$fhat))
-        KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
-        palRaster <- colorNumeric("Spectral", domain = KernelDensityRaster@data@values, na.color = "transparent")
-        
+        d0d <- bkde2D(cbind(mydata$lon,mydata$lat),bandwidth=c(.0045, .0068), gridsize = c(50,50))
+        palRaster <- colorNumeric(palette = c("yellow","Red"), domain = c(0,1), na.color = "transparent")
+         
         
         
         #density polygons
@@ -318,34 +345,34 @@ if (interactive()) {
         
         
         
-        clicked_map2 <- reactiveValues(clickedMarker=NULL)
-        observeEvent(input$map2_marker_click,{
-            clicked_map2$clickedMarker <- input$map2_marker_click
-        })
+        # clicked_map2 <- reactiveValues(clickedMarker=NULL)
+        # observeEvent(input$map2_marker_click,{
+        #     clicked_map2$clickedMarker <- input$map2_marker_click
+        # })
+        # 
+        # selected_coordinates1 <- reactive(({
+        #     c(clicked_map2$clickedMarker$lng,clicked_map2$clickedMarker$lat)
+        # }))
+        # 
         
-        selected_coordinates1 <- reactive(({
-            c(clicked_map2$clickedMarker$lng,clicked_map2$clickedMarker$lat)
-        }))
+        # clicked1<- reactive(({
+        #     subset(pre_2(),lon == as.numeric(selected_coordinates1()[1]) & lat == as.numeric(selected_coordinates1()[2]))
+        # }))
         
         
-        clicked1<- reactive(({
-            subset(pre_2(),lon == as.numeric(selected_coordinates1()[1]) & lat == as.numeric(selected_coordinates1()[2]))
-        }))
-        
-        
-        output$rain1 <- renderPlotly({
-            rain=clicked1()
-            if(is.null(rain))
-                return(NULL)
-            plot_ly(
-                x = c(" 7day","14day","28day"),
-                y = c(rain$arf7,rain$arf14,rain$arf28),
-                name = "rain fall",
-                type = "bar") %>%
-                layout(title = '',
-                       xaxis = list(title = "Period Average rain fall"),
-                       yaxis = list(title = "mm"))
-        })
+        # output$rain1 <- renderPlotly({
+        #     rain=clicked1()
+        #     if(is.null(rain))
+        #         return(NULL)
+        #     plot_ly(
+        #         x = c(" 7day","14day","28day"),
+        #         y = c(rain$arf7,rain$arf14,rain$arf28),
+        #         name = "rain fall",
+        #         type = "bar") %>%
+        #         layout(title = '',
+        #                xaxis = list(title = "Period Average rain fall"),
+        #                yaxis = list(title = "mm"))
+        # })
         
         
         output$temp1 <- renderPlotly({
@@ -446,8 +473,7 @@ if (interactive()) {
                          leafletProxy("map") %>%
                              addTiles() %>%clearGroup(group="density")
                          
-                         if ("accident" %in% input$reason)
-                         { 
+                         if ("accident" %in% input$reason){ 
                              leafletProxy("map") %>%
                                  addTiles() %>%
                                  addPolygons(data=dd3_accident(),col="#E69F00",group="plot density",stroke = FALSE)}
@@ -506,35 +532,293 @@ if (interactive()) {
                                  stroke = FALSE, fillOpacity = 20,
                                  popup= ~paste0("Fire reason: ", new_cause,"<br/>",
                                                 "Forest types: ",FOR_TYPE,"<br/>",
-                                                "Distance to road: ",round(dist_road))
-                )
+                                                "Distance to road: ",round(dist_road)))
         })
         
         output$map3 <- renderLeaflet({
             leaflet() %>%
                 addTiles() %>%
-                setView(lng= 144.7852, lat = -36.3913 , zoom = 6.3)
-            
-        })
-        
-        output$map3 <- renderLeaflet({
-            leaflet() %>% addTiles() %>% 
-                addRasterImage(KernelDensityRaster, 
-                               colors = palRaster, 
-                               opacity = .4) %>%
-                addLegend(pal = palRaster, 
-                          values = KernelDensityRaster@data@values, 
+                setView(lng= 144.7852, lat = -36.3913 , zoom = 6.3)%>%
+                addLegend(pal = palRaster, values = c(0,1), 
                           title = "Fire Probability")
             
         })
+        
+
         
         observe({leafletProxy("map3") %>%
-                addRasterImage(KernelDensityRaster, 
-                               colors = palRaster, 
-                               opacity = .4) %>%
-                addLegend(pal = palRaster, 
-                          values = KernelDensityRaster@data@values, 
-                          title = "Fire Probability")
+                addTiles() %>% clearShapes() 
+            
+            if( "arson"%in%input$reason2 & "Oct"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r10a))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+
+               
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            
+            
+            
+            if("accident"%in%input$reason2 & "Oct"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r10ac))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+                
+            
+            
+            
+            if( "lightning"%in%input$reason2 & "Oct"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r10l))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            
+            
+            if( "burningoff"%in%input$reason2 & "Oct"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r10b))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            
+            if( "arson"%in%input$reason2 & "Nov"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r11a))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            
+            if( "accident"%in%input$reason2 & "Nov"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r11ac))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+            
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            
+            if( "lightning"%in%input$reason2 & "Nov"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r11l))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+            
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            if( "burningoff"%in%input$reason2 & "Nov"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r11b))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            if( "arson"%in%input$reason2 & "Dec"%in%input$month2){
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r12a))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+            
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            if( "accident"%in%input$reason2 & "Dec"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r12ac))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+            
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            if( "lightning"%in%input$reason2 & "Dec"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r12l))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+            
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            
+            if( "burningoff"%in%input$reason2 & "Dec"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r12b))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            if( "arson"%in%input$reason2 & "Jan"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r1a))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+            
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            if( "accident"%in%input$reason2 & "Jan"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r1ac))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            if( "lightning"%in%input$reason2 & "Jan"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r1l))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+        
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            if( "burningoff"%in%input$reason2 & "Jan"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r1b))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            
+            if( "arson"%in%input$reason2 & "Feb"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r2a))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            
+            if( "accident"%in%input$reason2 & "Feb"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r2ac))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            
+            if( "lightning"%in%input$reason2 & "Feb"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r2l))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            
+            
+            if( "burningoff"%in%input$reason2 & "Feb"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r2b))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+                
+
+            
+            
+            if( "arson"%in%input$reason2 & "Mar"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r3a))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            
+            
+            if( "accident"%in%input$reason2 & "Mar"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r3ac))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            
+            if( "lightning"%in%input$reason2 & "Mar"%in%input$month2){
+                
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r3l))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+                
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+            
+            
+            
+            if( "burningoff"%in%input$reason2input$reason2 & "Mar"%in%input$month2){
+            
+                KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r3b))
+                KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+                
+            
+                leafletProxy("map3") %>%
+                    addTiles() %>%
+                    addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
+ 
+                     
         })
         
         
