@@ -25,44 +25,44 @@ js <- c(
 
 
 # Load in training data
-# mydata <- read_csv("mydata.csv")
-# mydata1 <- mydata
-# mydata2<- read_csv("mydata2.csv")
-# mydata4<- read_csv("mydata4.csv")
-# prediction <- read_csv("prediction.csv")
-# simulation <- read_csv("simulation.csv")
+mydata <- read_csv("mydata.csv")
+mydata1 <- mydata
+mydata2<- read_csv("mydata2.csv")
+mydata4<- read_csv("mydata4.csv")
+prediction <- read_csv("prediction.csv")
+simulation <- read_csv("simulation.csv")
 
-# 
-# ratio1arson <- read_csv("ratio1arson.csv")
-# ratio1accident <- read_csv("ratio1accident.csv")
-# ratio1lightning <- read_csv("ratio1lightning.csv")
-# ratio1burning_off <- read_csv("ratio1burning_off.csv")
-# 
-# ratio2arson <- read_csv("ratio2arson.csv")
-# ratio2accident <- read_csv("ratio2accident.csv")
-# ratio2lightning <- read_csv("ratio2lightning.csv")
-# ratio2burning_off <- read_csv("ratio2burning_off.csv")
-# 
-# ratio3arson <- read_csv("ratio3arson.csv")
-# ratio3accident <- read_csv("ratio3accident.csv")
-# ratio3lightning <- read_csv("ratio3lightning.csv")
-# ratio3burning_off <- read_csv("ratio3burning_off.csv")
-# 
-# 
-# ratio10arson <- read_csv("ratio10arson.csv")
-# ratio10accident <- read_csv("ratio10accident.csv")
-# ratio10lightning <- read_csv("ratio10lightning.csv")
-# ratio10burning_off <- read_csv("ratio10burning_off.csv")
-# 
-# ratio11arson <- read_csv("ratio11arson.csv")
-# ratio11accident <- read_csv("ratio11accident.csv")
-# ratio11lightning <- read_csv("ratio11lightning.csv")
-# ratio11burning_off <- read_csv("ratio11burning_off.csv")
-# 
-# ratio12arson <- read_csv("ratio12arson.csv")
-# ratio12accident <- read_csv("ratio12accident.csv")
-# ratio12lightning <- read_csv("ratio12lightning.csv")
-# ratio12burning_off <- read_csv("ratio12burning_off.csv")
+
+ratio1arson <- read_csv("ratio1arson.csv")
+ratio1accident <- read_csv("ratio1accident.csv")
+ratio1lightning <- read_csv("ratio1lightning.csv")
+ratio1burning_off <- read_csv("ratio1burning_off.csv")
+
+ratio2arson <- read_csv("ratio2arson.csv")
+ratio2accident <- read_csv("ratio2accident.csv")
+ratio2lightning <- read_csv("ratio2lightning.csv")
+ratio2burning_off <- read_csv("ratio2burning_off.csv")
+
+ratio3arson <- read_csv("ratio3arson.csv")
+ratio3accident <- read_csv("ratio3accident.csv")
+ratio3lightning <- read_csv("ratio3lightning.csv")
+ratio3burning_off <- read_csv("ratio3burning_off.csv")
+
+
+ratio10arson <- read_csv("ratio10arson.csv")
+ratio10accident <- read_csv("ratio10accident.csv")
+ratio10lightning <- read_csv("ratio10lightning.csv")
+ratio10burning_off <- read_csv("ratio10burning_off.csv")
+
+ratio11arson <- read_csv("ratio11arson.csv")
+ratio11accident <- read_csv("ratio11accident.csv")
+ratio11lightning <- read_csv("ratio11lightning.csv")
+ratio11burning_off <- read_csv("ratio11burning_off.csv")
+
+ratio12arson <- read_csv("ratio12arson.csv")
+ratio12accident <- read_csv("ratio12accident.csv")
+ratio12lightning <- read_csv("ratio12lightning.csv")
+ratio12burning_off <- read_csv("ratio12burning_off.csv")
 
 
 
