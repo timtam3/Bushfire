@@ -837,7 +837,6 @@ if (interactive()) {
                 KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r3b))
                 KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
                 
-            
                 leafletProxy("map3") %>%
                     addTiles() %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
