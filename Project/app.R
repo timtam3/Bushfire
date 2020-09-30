@@ -13,47 +13,56 @@ library(rgdal)
 library(maptools)
 library(raster)
 library(DT)
+library(htmlwidgets)
+
+
+js <- c(
+    "function(el, x){",
+    "  el.on('plotly_legendclick', function(evtData) {",
+    "    Shiny.setInputValue('trace', evtData.data[evtData.curveNumber].name);",
+    "  });",
+    "}")
 
 
 # Load in training data
- mydata <- read_csv("mydata.csv")
- mydata1 <- mydata
- mydata2<- read_csv("mydata2.csv")
- mydata4<- read_csv("mydata4.csv")
- prediction <- read_csv("prediction.csv")
- simulation <- read_csv("simulation.csv")
+# mydata <- read_csv("mydata.csv")
+# mydata1 <- mydata
+# mydata2<- read_csv("mydata2.csv")
+# mydata4<- read_csv("mydata4.csv")
+# prediction <- read_csv("prediction.csv")
+# simulation <- read_csv("simulation.csv")
 
-
-ratio1arson <- read_csv("ratio1arson.csv")
-ratio1accident <- read_csv("ratio1accident.csv")
-ratio1lightning <- read_csv("ratio1lightning.csv")
-ratio1burning_off <- read_csv("ratio1burning_off.csv")
-
-ratio2arson <- read_csv("ratio2arson.csv")
-ratio2accident <- read_csv("ratio2accident.csv")
-ratio2lightning <- read_csv("ratio2lightning.csv")
-ratio2burning_off <- read_csv("ratio2burning_off.csv")
-
-ratio3arson <- read_csv("ratio3arson.csv")
-ratio3accident <- read_csv("ratio3accident.csv")
-ratio3lightning <- read_csv("ratio3lightning.csv")
-ratio3burning_off <- read_csv("ratio3burning_off.csv")
-
-
-ratio10arson <- read_csv("ratio10arson.csv")
-ratio10accident <- read_csv("ratio10accident.csv")
-ratio10lightning <- read_csv("ratio10lightning.csv")
-ratio10burning_off <- read_csv("ratio10burning_off.csv")
-
-ratio11arson <- read_csv("ratio11arson.csv")
-ratio11accident <- read_csv("ratio11accident.csv")
-ratio11lightning <- read_csv("ratio11lightning.csv")
-ratio11burning_off <- read_csv("ratio11burning_off.csv")
-
-ratio12arson <- read_csv("ratio12arson.csv")
-ratio12accident <- read_csv("ratio12accident.csv")
-ratio12lightning <- read_csv("ratio12lightning.csv")
-ratio12burning_off <- read_csv("ratio12burning_off.csv")
+# 
+# ratio1arson <- read_csv("ratio1arson.csv")
+# ratio1accident <- read_csv("ratio1accident.csv")
+# ratio1lightning <- read_csv("ratio1lightning.csv")
+# ratio1burning_off <- read_csv("ratio1burning_off.csv")
+# 
+# ratio2arson <- read_csv("ratio2arson.csv")
+# ratio2accident <- read_csv("ratio2accident.csv")
+# ratio2lightning <- read_csv("ratio2lightning.csv")
+# ratio2burning_off <- read_csv("ratio2burning_off.csv")
+# 
+# ratio3arson <- read_csv("ratio3arson.csv")
+# ratio3accident <- read_csv("ratio3accident.csv")
+# ratio3lightning <- read_csv("ratio3lightning.csv")
+# ratio3burning_off <- read_csv("ratio3burning_off.csv")
+# 
+# 
+# ratio10arson <- read_csv("ratio10arson.csv")
+# ratio10accident <- read_csv("ratio10accident.csv")
+# ratio10lightning <- read_csv("ratio10lightning.csv")
+# ratio10burning_off <- read_csv("ratio10burning_off.csv")
+# 
+# ratio11arson <- read_csv("ratio11arson.csv")
+# ratio11accident <- read_csv("ratio11accident.csv")
+# ratio11lightning <- read_csv("ratio11lightning.csv")
+# ratio11burning_off <- read_csv("ratio11burning_off.csv")
+# 
+# ratio12arson <- read_csv("ratio12arson.csv")
+# ratio12accident <- read_csv("ratio12accident.csv")
+# ratio12lightning <- read_csv("ratio12lightning.csv")
+# ratio12burning_off <- read_csv("ratio12burning_off.csv")
 
 
 
@@ -88,9 +97,6 @@ r12a<-ratio12arson
 r12b<-ratio12burning_off
 r12l<-ratio12lightning
 r12ac<-ratio12accident
-
-
-
 
 
 ystart = -39.08246
@@ -139,9 +145,8 @@ if (interactive()) {
                                        wellPanel(
                                            tabsetPanel(
                                                tabPanel(tags$em("Percentage",style="font-size:100%"),
-                                                        tags$hr(style="border-color: #ffc266;"),
-                                                        plotlyOutput("p1"),
-                                                        plotlyOutput("p2")
+                                                        plotlyOutput("p1",height = 300),
+                                                        plotlyOutput("p2",height = 200)
                                                ),
                                                
                                                tabPanel(tags$em("Rainfall",style="font-size:100%"),
@@ -243,7 +248,8 @@ if (interactive()) {
         })
         
         d0d <- bkde2D(cbind(mydata$lon,mydata$lat),bandwidth=c(.0045, .0068), gridsize = c(50,50))
-        palRaster <- colorNumeric(palette = c("yellow","Red"), domain = c(0,1), na.color = "transparent")
+   
+         palRaster <- colorNumeric(palette = c("yellow","Red"), domain = c(0,1), na.color = "transparent")
          
         
         
@@ -339,7 +345,8 @@ if (interactive()) {
                 add_trace(y = c(temp$amint7,temp$amint14,temp$amint28),name="min")%>%
                 layout(title = '',
                        xaxis = list(title = "Period Average Max/Min Temperature"),
-                       yaxis = list(title = "°C"))
+                       yaxis = list(title = "Temperature (°C)")
+                       )
         })
         
         
@@ -408,23 +415,39 @@ if (interactive()) {
         
         gig <- ggplot(mydata2, aes(x = year, y = Total, fill = new_cause)) +
             geom_bar(stat = "identity")
+
         
-        fig <- plot_ly(mydata4, 
-                       x = ~year, 
-                       y = ~accident, 
-                       type = 'bar', 
-                       name = 'accident') %>%
-            add_trace(y = ~arson, name = 'arson')%>% 
-            add_trace(y = ~burningoff, name = 'burningoff')%>%
-            add_trace(y = ~lightning, name = 'lightning')%>%
-            add_trace(y = ~other, name = 'other')%>%
-            add_trace(y = ~relight, name = 'relight')%>%
-            layout(yaxis = list(title = 'Count'), barmode = 'stack')
         
+        fig <- plot_ly(mydata4, x = ~year, y = ~accident, type = 'bar',
+                       name = 'accident',marker=list(color="#E69F00",level=1)) %>%
+            
+            add_trace(y = ~arson, name = 'arson',marker=list(color="#000000"))%>% 
+            add_trace(y = ~relight, name = 'burningoff',marker=list(color="#0072B2"))%>%
+            add_trace(y = ~lightning, name = 'lightning',marker=list(color="#009E73"))%>%
+            add_trace(y = ~other, name = 'other',marker=list(color="#F0E442"))%>%
+            add_trace(y = ~burningoff, name = 'relight',marker=list(color="#CC79A7"))%>%
+            layout(yaxis = list(title = 'Total number'),legend=list(traceorder="normal"), barmode = 'stack')
         
         output$p1 <- renderPlotly({
-            subplot(t,fig,nrows=2,shareX = T)%>% layout(legend = list(tracegroupgap=6),yaxis2=list(ticks = "outside",dtick = 50,  tick0 = 0,tickmode = "array" ))
+            fig
+            fig %>% onRender(js)
         })
+        
+        output$p2 <- renderPlotly({
+            d <- input$trace
+        
+            
+             mydata2 %>%
+                filter(new_cause %in% d) %>%
+                 plot_ly()%>%
+                 add_lines(x = ~year, y = ~Total,name="Fire trend")%>%
+                 layout(yaxis = list(zeroline = FALSE, showline = FALSE,
+                     autotick =TRUE, ticks = "outside", rangemode = 'tozero', title = 'Total number'),
+                     showlegend = TRUE, xaxis=list(autotick =TRUE,showline = TRUE,ticks = "outside"))
+
+        })
+            # subplot(t,fig,nrows=2,shareX = T)%>% layout(legend = list(tracegroupgap=6),yaxis2=list(ticks = "outside",dtick = 50,  tick0 = 0,tickmode = "array" ))
+        
         
         
         output$percentage <- renderPlot({
@@ -458,11 +481,12 @@ if (interactive()) {
                                  radius = 3, 
                                  color = ~pal(new_cause),
                                  stroke = FALSE, fillOpacity = 20, 
-                                 popup= ~paste0("Fire starts at: ", FIRE_START, "<br/>",
-                                                "Wind speed:", round(ws,2),"<br/>",
+                                 popup= ~paste0("Fire ID: ", EVENTID, "<br/>",
+                                     "Fire starts at: ", FIRE_START, "<br/>",
+                                                "Wind speed: ", round(ws,2),"  m/s","<br/>",
                                                 "Fire reason: ", new_cause,"<br/>",
                                                 "Forest types: ",FOR_TYPE,"<br/>",
-                                                "Distance to road: ",round(dist_road)
+                                                "Distance to road: ",round(dist_road),"  metres"
                                  ))
             
         })
@@ -471,7 +495,7 @@ if (interactive()) {
         observeEvent(input$showd,
                      {
                          leafletProxy("map") %>%
-                             addTiles() %>%clearGroup(group="density")
+                             addTiles() %>%clearGroup(group="plot density")
                          
                          if ("accident" %in% input$reason){ 
                              leafletProxy("map") %>%
