@@ -175,13 +175,9 @@ if (interactive()) {
                                                                     individual = TRUE,justified = FALSE,
                                                                     width = "100%"),
                                                checkboxGroupInput("reason1", label = "Choose Reason for geographic plot:",
-                                                                  choices = levels(factor(prediction$new_cause)), selected = "Any"),
-                                               radioButtons("month2", label = "Choose Month for possibility plot:",
-                                                            choices = c("Oct","Nov","Dec","Jan","Feb","Mar"),selected = "Any"),
-                                               radioButtons("reason2", label = "Choose Reason for possibility polt:",
-                                                            choices = levels(factor(prediction$new_cause)), selected = "Any")
+                                                                  choices = levels(factor(prediction$new_cause)), selected = "Any")
                                                ),
-                                           mainPanel(leafletOutput(outputId = "map2",height = 330),leafletOutput(outputId = "map3",height = 330))
+                                           mainPanel(leafletOutput(outputId = "map2",height = 330))
                                            
                                        )),
                                 wellPanel(
@@ -205,6 +201,43 @@ if (interactive()) {
                                 
                             )
                    ),
+                   
+                   
+                   tabPanel("Fire probability map", 
+                            fluidRow(
+                                column(8,align="left",
+                                       sidebarLayout(
+                                           sidebarPanel(
+                                               helpText("Predicted fire probability maps"),
+                                               radioButtons("month2", label = "Choose Month for possibility plot:",
+                                                            choices = c("Oct","Nov","Dec","Jan","Feb","Mar"),selected = "Any"),
+                                               radioButtons("reason2", label = "Choose Reason for possibility polt:",
+                                                            choices = levels(factor(prediction$new_cause)), selected = "Any")
+                                           ),
+                                           mainPanel(leafletOutput(outputId = "map3",height = 330))
+                                           
+                                       )),
+                                # wellPanel(
+                                #     tabsetPanel(
+                                #         # tabPanel(tags$em("Percentage",style="font-size:100%"),
+                                #         #          tags$hr(style="border-color: #ffc266;"),
+                                #         #          plotlyOutput("p3"),
+                                #         #          plotlyOutput("p4")
+                                #         # ),
+                                #         
+                                #         tabPanel(tags$em("Rainfall",style="font-size:100%"),
+                                #                  tags$hr(style="border-color:  #d27979;"),
+                                #                  plotlyOutput("rain1")),
+                                #         
+                                #         tabPanel(tags$em("Temperature",style="font-size:100%"),
+                                #                  tags$hr(style="border-color:  #ffc266;"),
+                                #                  plotlyOutput("temp1"))
+                                #     )
+                                # )
+                                
+                            )
+                   ),
+                   
                    
                    
                    
@@ -249,7 +282,7 @@ if (interactive()) {
         
         d0d <- bkde2D(cbind(mydata$lon,mydata$lat),bandwidth=c(.0045, .0068), gridsize = c(50,50))
    
-         palRaster <- colorNumeric(palette = c("yellow","Red"), domain = c(0,1), na.color = "transparent")
+         palRaster <- colorNumeric(palette = c("yellow","Red"), domain = c(1,0), na.color = "transparent")
          
         
         
@@ -325,12 +358,13 @@ if (interactive()) {
                 return(NULL)
             plot_ly(
                 x = c(" 7day","14day","28day"),
-                y = c(rain$arf7,rain$arf14,rain$arf28),
-                name = "rain fall",
+                y = c(rain$avr7,rain$avr14,rain$avr28),name="20 years average",opacity=0.3,
                 type = "bar") %>%
+                add_trace(y= c(rain$arf7,rain$arf14,rain$arf28),name = "rain fall for that time", type = 'bar',width=0.3,opacity=1)%>%
                 layout(title = '',
                        xaxis = list(title = "Period Average rain fall"),
-                       yaxis = list(title = "mm"))
+                       yaxis = list(title = "mm"),
+                       barmode = 'overlay')
         })
         
         
@@ -341,8 +375,10 @@ if (interactive()) {
             plot_ly(
                 x = c(" 7day","14day","28day"),
                 y = c(temp$amaxt7,temp$amaxt14,temp$amaxt28),
-                type = 'scatter', mode = 'lines',name="max") %>%
-                add_trace(y = c(temp$amint7,temp$amint14,temp$amint28),name="min")%>%
+                type = 'scatter', mode = 'lines',name="max",line = list(color = 'rgb(205, 12, 24)')) %>%
+                add_trace(y = c(temp$amint7,temp$amint14,temp$amint28),name="min",line = list(color = 'rgb(22, 96, 167)'))%>%
+                add_trace(y = c(temp$avmin7,temp$avmin14,temp$avmin28),name="20 year average min",line = list(color = 'rgb(22, 96, 167)'),opacity=0.3)%>%
+                add_trace(y = c(temp$avmax7,temp$avmax14,temp$avmax28),name="20 year average max",line = list(color = 'rgb(205, 12, 24)'),opacity=0.3)%>%
                 layout(title = '',
                        xaxis = list(title = "Period Average Max/Min Temperature"),
                        yaxis = list(title = "Temperature (°C)")
@@ -352,45 +388,45 @@ if (interactive()) {
         
         
         
-        # clicked_map2 <- reactiveValues(clickedMarker=NULL)
-        # observeEvent(input$map2_marker_click,{
-        #     clicked_map2$clickedMarker <- input$map2_marker_click
-        # })
-        # 
-        # selected_coordinates1 <- reactive(({
-        #     c(clicked_map2$clickedMarker$lng,clicked_map2$clickedMarker$lat)
-        # }))
-        # 
-        
-        # clicked1<- reactive(({
-        #     subset(pre_2(),lon == as.numeric(selected_coordinates1()[1]) & lat == as.numeric(selected_coordinates1()[2]))
-        # }))
-        
-        
-        # output$rain1 <- renderPlotly({
-        #     rain=clicked1()
-        #     if(is.null(rain))
-        #         return(NULL)
-        #     plot_ly(
-        #         x = c(" 7day","14day","28day"),
-        #         y = c(rain$arf7,rain$arf14,rain$arf28),
-        #         name = "rain fall",
-        #         type = "bar") %>%
-        #         layout(title = '',
-        #                xaxis = list(title = "Period Average rain fall"),
-        #                yaxis = list(title = "mm"))
-        # })
-        
-        
-        output$temp1 <- renderPlotly({
-            temp=clicked1()
-            if(is.null(temp))
+        clicked_map2 <- reactiveValues(clickedMarker=NULL)
+        observeEvent(input$map2_marker_click,{
+            clicked_map2$clickedMarker <- input$map2_marker_click
+        })
+
+        selected_coordinates1 <- reactive(({
+            c(clicked_map2$clickedMarker$lng,clicked_map2$clickedMarker$lat)
+        }))
+
+
+        clicked1<- reactive(({
+            subset(pre_2(),lon == as.numeric(selected_coordinates1()[1]) & lat == as.numeric(selected_coordinates1()[2]))
+        }))
+
+
+        output$rain1 <- renderPlotly({
+            rain1=clicked1()
+            if(is.null(rain1))
                 return(NULL)
             plot_ly(
                 x = c(" 7day","14day","28day"),
-                y = c(temp$amaxt7,temp$amaxt14,temp$amaxt28),
+                y = c(rain1$arf7,rain1$arf14,rain1$arf28),
+                name = "rain fall",
+                type = "bar") %>%
+                layout(title = '',
+                       xaxis = list(title = "Period Average rain fall"),
+                       yaxis = list(title = "mm"))
+        })
+
+        
+        output$temp1 <- renderPlotly({
+            temp1=clicked1()
+            if(is.null(temp1))
+                return(NULL)
+            plot_ly(
+                x = c(" 7day","14day","28day"),
+                y = c(temp1$amaxt7,temp1$amaxt14,temp1$amaxt28),
                 type = 'scatter', mode = 'lines',name="max") %>%
-                add_trace(y = c(temp$amint7,temp$amint14,temp$amint28),name="min")%>%
+                add_trace(y = c(temp1$amint7,temp1$amint14,temp1$amint28),name="min")%>%
                 layout(title = '',
                        xaxis = list(title = "Period Average Max/Min Temperature"),
                        yaxis = list(title = "°C"))
@@ -563,7 +599,7 @@ if (interactive()) {
             leaflet() %>%
                 addTiles() %>%
                 setView(lng= 144.7852, lat = -36.3913 , zoom = 6.3)%>%
-                addLegend(pal = palRaster, values = c(0,1), 
+                addLegend(pal = palRaster, values = c(1,0), 
                           title = "Fire Probability")
             
         })
@@ -837,6 +873,7 @@ if (interactive()) {
                 KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r3b))
                 KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
                 
+            
                 leafletProxy("map3") %>%
                     addTiles() %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
