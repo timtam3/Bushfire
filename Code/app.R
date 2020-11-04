@@ -25,12 +25,12 @@ js <- c(
 
 
 # Load in training data
-mydata <- read_csv("mydata.csv")
-mydata1 <- mydata
-mydata2<- read_csv("mydata2.csv")
-mydata4<- read_csv("mydata4.csv")
-prediction <- read_csv("prediction.csv")
-simulation <- read_csv("simulation.csv")
+# mydata <- read_csv("mydata.csv")
+# mydata1 <- mydata
+# mydata2<- read_csv("mydata2.csv")
+# mydata4<- read_csv("mydata4.csv")
+# prediction <- read_csv("prediction.csv")
+# simulation <- read_csv("simulation.csv")
 
 
 ratio1arson <- read_csv("ratio1arson.csv")
@@ -125,16 +125,16 @@ if (interactive()) {
                                                
                                                checkboxGroupButtons("month", label = "Choose Month:",
                                                                     choices = c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"),
-                                                                    individual = TRUE,justified = FALSE,
+                                                                    individual = TRUE,justified = FALSE, selected=c("Nov","Dec","Jan"),
                                                                     width = "100%"),
                                                
                                                checkboxGroupInput("reason", label = "Choose Reason:",
-                                                                  choices = levels(factor(mydata$new_cause)), selected = "Any"),
+                                                                  choices = levels(factor(mydata$new_cause)), selected = c("lightning","arson","accident")),
                                                actionButton("showd","Show density plot"),
                                                actionButton("cleard","Clear density plot")),
                                            
                                            mainPanel(
-                                               leafletOutput(outputId = "map",height = 580)))),
+                                               leafletOutput(outputId = "map",height = 587)))),
                                 
                                 
                                 column(4, 
@@ -171,12 +171,12 @@ if (interactive()) {
                                                helpText("Map of fires 2019.10-2020.3 with predicted causes"),
                                                checkboxGroupButtons("month1", label = "Choose Month for geographic plot:",
                                                                     choices = c("Oct","Nov","Dec","Jan","Feb","Mar"),
-                                                                    individual = TRUE,justified = FALSE,
+                                                                    individual = TRUE,justified = FALSE,selected = c("Oct"),
                                                                     width = "100%"),
                                                checkboxGroupInput("reason1", label = "Choose Reason for geographic plot:",
-                                                                  choices = levels(factor(prediction$new_cause)), selected = "Any")
+                                                                  choices = levels(factor(prediction$new_cause)), selected = c("arson","burningoff","lightning"))
                                                ),
-                                           mainPanel(leafletOutput(outputId = "map2",height = 330))
+                                           mainPanel(leafletOutput(outputId = "map2",height = 587))
                                            
                                        )),
                                 column(4, 
@@ -202,7 +202,7 @@ if (interactive()) {
                             )
                    ),
                    
-                   
+                    
                    tabPanel("Fire risk map", 
                             fluidRow(
                                 column(8,align="left",
@@ -210,11 +210,11 @@ if (interactive()) {
                                            sidebarPanel(
                                                helpText("Predicted fire probability maps"),
                                                radioButtons("month2", label = "Choose Month for possibility plot:",
-                                                            choices = c("Oct","Nov","Dec","Jan","Feb","Mar"),selected = "Any"),
+                                                            choices = c("Oct","Nov","Dec","Jan","Feb","Mar"),selected = c("Oct")),
                                                radioButtons("reason2", label = "Choose Reason for possibility polt:",
-                                                            choices = levels(factor(prediction$new_cause)), selected = "Any")
+                                                            choices = levels(factor(prediction$new_cause)), selected = c("arson"))
                                            ),
-                                           mainPanel(leafletOutput(outputId = "map3",height = 330))
+                                           mainPanel(leafletOutput(outputId = "map3",height = 587))
                                            
                                        )),
                                 # wellPanel(
@@ -609,9 +609,16 @@ if (interactive()) {
                 addTiles() %>%
                 addLegend(pal=pal1, values=prediction$new_cause) %>%
                 setView(lng= 144.7852, lat = -36.3913 , zoom = 6.3)%>%
-                addMouseCoordinates()
+                addMouseCoordinates()%>%
+                addCircleMarkers(data = pre_2(), lat =  ~lat, lng =~lon,
+                                 radius = 3,
+                                 color = ~pal1(new_cause),
+                                 stroke = FALSE, fillOpacity = 20)
             
         })
+        
+        
+        
         
         observe({leafletProxy("map2") %>%
                 clearMarkers() %>%
@@ -624,12 +631,17 @@ if (interactive()) {
                                                 "Distance to road: ",round(dist_road)))
         })
         
+        
+        KernelDensityRaster<-raster(list(x=d0d$x1 ,y=d0d$x2 ,z = r10a))
+        KernelDensityRaster@data@values[which(KernelDensityRaster@data@values < 0.07)] <- NA
+        
         output$map3 <- renderLeaflet({
             leaflet() %>%
-                addProviderTiles("CartoDB") %>%
+                addProviderTiles("CartoDB")  %>%
                 setView(lng= 144.7852, lat = -36.3913 , zoom = 6.3)%>%
                 addLegend(pal = palRaster, values = c(1,0), 
-                          title = "Fire Probability")
+                          title = "Fire Probability")%>%
+                addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)
             
         })
         
@@ -645,7 +657,6 @@ if (interactive()) {
 
                
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             
@@ -658,7 +669,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
                 
             
@@ -672,7 +682,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             
@@ -685,7 +694,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             
@@ -696,7 +704,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB")%>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             
@@ -708,7 +715,6 @@ if (interactive()) {
                 
             
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             
@@ -719,7 +725,6 @@ if (interactive()) {
                 
             
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             if( "burningoff"%in%input$reason2 & "Nov"%in%input$month2){
@@ -729,7 +734,6 @@ if (interactive()) {
                 
 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB")%>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             if( "arson"%in%input$reason2 & "Dec"%in%input$month2){
@@ -738,7 +742,6 @@ if (interactive()) {
                 
             
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             if( "accident"%in%input$reason2 & "Dec"%in%input$month2){
@@ -748,7 +751,6 @@ if (interactive()) {
                 
             
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             if( "lightning"%in%input$reason2 & "Dec"%in%input$month2){
@@ -758,7 +760,6 @@ if (interactive()) {
                 
             
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             
@@ -769,7 +770,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             if( "arson"%in%input$reason2 & "Jan"%in%input$month2){
@@ -779,7 +779,6 @@ if (interactive()) {
                 
             
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             if( "accident"%in%input$reason2 & "Jan"%in%input$month2){
@@ -789,7 +788,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             if( "lightning"%in%input$reason2 & "Jan"%in%input$month2){
@@ -799,7 +797,6 @@ if (interactive()) {
                 
         
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             if( "burningoff"%in%input$reason2 & "Jan"%in%input$month2){
@@ -809,7 +806,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             
@@ -821,7 +817,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             
@@ -833,7 +828,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             
@@ -844,7 +838,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             
@@ -856,7 +849,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
                 
 
@@ -869,7 +861,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             
@@ -881,7 +872,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             
@@ -892,7 +882,6 @@ if (interactive()) {
                 
                 
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
             
             
@@ -904,7 +893,6 @@ if (interactive()) {
                 
             
                 leafletProxy("map3") %>%
-                    addProviderTiles("CartoDB") %>%
                     addRasterImage(KernelDensityRaster,colors = palRaster,opacity = .4)}
  
                      
@@ -912,7 +900,7 @@ if (interactive()) {
         
         
         output$data <-DT::renderDataTable(datatable(
-            mydata[,c(3:5,8,10,11,13,14,65)],filter = 'top',
+            mydata[,c(4:5,8,10,11,13,14,65)],filter = 'top',
             colnames = c("EventID","Fire name","Fire district","Fire Start","Longitude","Latitude","Forest Type","Forest Category",
                          "Cause")
         ))
