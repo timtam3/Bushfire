@@ -112,7 +112,7 @@ if (interactive()) {
     ui <- fluidPage(
         navbarPage("VICfire", id="main",
                    
-                   tabPanel("1990.1-2019.9 Historical fire map",
+                   tabPanel("Historical fire map",
                             fluidRow(
                                 
                                 column(8,align="left",
@@ -163,7 +163,7 @@ if (interactive()) {
                             )
                    ),
                    
-                   tabPanel("2019.10-2020.3 Predicted causes map", 
+                   tabPanel("2019-2020 Predicted causes", 
                             fluidRow(
                                 column(8,align="left",
                                        sidebarLayout(
@@ -171,10 +171,10 @@ if (interactive()) {
                                                helpText("Map of fires 2019.10-2020.3 with predicted causes"),
                                                checkboxGroupButtons("month1", label = "Choose Month for geographic plot:",
                                                                     choices = c("Oct","Nov","Dec","Jan","Feb","Mar"),
-                                                                    individual = TRUE,justified = FALSE,selected = c("Oct"),
+                                                                    individual = TRUE,justified = FALSE,selected = c("Dec"),
                                                                     width = "100%"),
                                                checkboxGroupInput("reason1", label = "Choose Reason for geographic plot:",
-                                                                  choices = levels(factor(prediction$new_cause)), selected = c("arson","burningoff","lightning"))
+                                                                  choices = levels(factor(prediction$new_cause)), selected = c("arson","lightning","accident"))
                                                ),
                                            mainPanel(leafletOutput(outputId = "map2",height = 587))
                                            
@@ -242,7 +242,8 @@ if (interactive()) {
                    
                    
                    tabPanel("Data", DT::dataTableOutput("data")),
-                   tabPanel("Read Me")
+                   tabPanel("Read Me",includeMarkdown("readme.md"))
+                            
         )
     )
     
@@ -901,9 +902,12 @@ if (interactive()) {
         
         output$data <-DT::renderDataTable(datatable(
             mydata[,c(4:5,8,10,11,13,14,65)],filter = 'top',
-            colnames = c("EventID","Fire name","Fire district","Fire Start","Longitude","Latitude","Forest Type","Forest Category",
+            colnames = c("Fire name","Fire district","Fire Start","Longitude","Latitude","Forest Type","Forest Category",
                          "Cause")
         ))
+        
+      
+            
         
         
     }
