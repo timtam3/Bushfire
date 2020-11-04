@@ -118,18 +118,22 @@ if (interactive()) {
                                 column(8,align="left",
                                        sidebarLayout(
                                            sidebarPanel(
-                                               helpText("Create demographic maps of fire in Victoria"),
+                                               helpText("Historical locations on fires, and ignition causes, in Victoria over 2000-2019."),
 
                                                sliderInput("year", label = "Choose Year",
-                                                           value = c(2010,2017),min = min(mydata$year), max=max(mydata$year),step = 1),
+                                                           value = c(2010,2017),
+                                                           min = min(mydata$year),
+                                                           max=max(mydata$year),
+                                                           step = 1,
+                                                           sep = ""),
 
                                                checkboxGroupButtons("month", label = "Choose Month:",
                                                                     choices = c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"),
                                                                     individual = TRUE,justified = FALSE,
-                                                                    width = "100%"),
+                                                                    width = "100%", selected = c("Jan","Feb","Mar","Oct","Nov","Dec")),
 
                                                checkboxGroupInput("reason", label = "Choose Reason:",
-                                                                  choices = levels(factor(mydata$new_cause)), selected = "Any"),
+                                                                  choices = levels(factor(mydata$new_cause)), selected = "lightning"),
                                                actionButton("showd","Show density plot"),
                                                actionButton("cleard","Clear density plot")),
 
@@ -168,13 +172,13 @@ if (interactive()) {
                                 column(8,align="left",
                                        sidebarLayout(
                                            sidebarPanel(
-                                               helpText("Map of fires 2019.10-2020.3 with predicted causes"),
+                                               helpText("Predicted causes for fire ignition points over Oct 2019 through Mar 2020"),
                                                checkboxGroupButtons("month1", label = "Choose Month:",
                                                                     choices = c("Oct","Nov","Dec","Jan","Feb","Mar"),
                                                                     individual = TRUE,justified = FALSE,
-                                                                    width = "100%"),
+                                                                    width = "100%", selected = "Dec"),
                                                checkboxGroupInput("reason1", label = "Choose Reason:",
-                                                                  choices = levels(factor(prediction$new_cause)), selected = "Any")
+                                                                  choices = levels(factor(prediction$new_cause)), selected = "lightning")
                                                ),
                                            mainPanel(leafletOutput(outputId = "map2",height = 330))
 
