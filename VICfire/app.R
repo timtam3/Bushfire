@@ -25,79 +25,7 @@ js <- c(
 
 
 # Load in training data
-mydata <- read_csv("data/mydata.csv")
-mydata1 <- mydata
-mydata2 <- read_csv("data/mydata2.csv")
-mydata4 <- read_csv("data/mydata4.csv")
-prediction <- read_csv("data/prediction.csv")
-simulation <- read_csv("data/simulation.csv")
-
-
-ratio1arson <- read_csv("data/ratio1arson.csv")
-ratio1accident <- read_csv("data/ratio1accident.csv")
-ratio1lightning <- read_csv("data/ratio1lightning.csv")
-ratio1burning_off <- read_csv("data/ratio1burning_off.csv")
-
-ratio2arson <- read_csv("data/ratio2arson.csv")
-ratio2accident <- read_csv("data/ratio2accident.csv")
-ratio2lightning <- read_csv("data/ratio2lightning.csv")
-ratio2burning_off <- read_csv("data/ratio2burning_off.csv")
-
-ratio3arson <- read_csv("data/ratio3arson.csv")
-ratio3accident <- read_csv("data/ratio3accident.csv")
-ratio3lightning <- read_csv("data/ratio3lightning.csv")
-ratio3burning_off <- read_csv("data/ratio3burning_off.csv")
-
-
-ratio10arson <- read_csv("data/ratio10arson.csv")
-ratio10accident <- read_csv("data/ratio10accident.csv")
-ratio10lightning <- read_csv("data/ratio10lightning.csv")
-ratio10burning_off <- read_csv("data/ratio10burning_off.csv")
-
-ratio11arson <- read_csv("data/ratio11arson.csv")
-ratio11accident <- read_csv("data/ratio11accident.csv")
-ratio11lightning <- read_csv("data/ratio11lightning.csv")
-ratio11burning_off <- read_csv("data/ratio11burning_off.csv")
-
-ratio12arson <- read_csv("data/ratio12arson.csv")
-ratio12accident <- read_csv("data/ratio12accident.csv")
-ratio12lightning <- read_csv("data/ratio12lightning.csv")
-ratio12burning_off <- read_csv("data/ratio12burning_off.csv")
-
-
-
-
-r1a<-ratio1arson
-r1ac<-ratio1accident
-r1l<-ratio1lightning
-r1b<-ratio1burning_off
-
-r2a<-ratio2arson
-r2b<-ratio2burning_off
-r2l<-ratio2lightning
-r2ac<-ratio2accident
-
-
-r3a<-ratio3arson
-r3b<-ratio3burning_off
-r3l<-ratio3lightning
-r3ac<-ratio3accident
-
-r10a<-ratio10arson
-r10b<-ratio10burning_off
-r10l<-ratio10lightning
-r10ac<-ratio10accident
-
-r11a<-ratio11arson
-r11b<-ratio11burning_off
-r11l<-ratio11lightning
-r11ac<-ratio11accident
-
-r12a<-ratio12arson
-r12b<-ratio12burning_off
-r12l<-ratio12lightning
-r12ac<-ratio12accident
-
+load("save.RData")
 
 ystart = -39.08246
 yend = -34.03690
@@ -246,7 +174,7 @@ if (interactive()) {
 
 
                    tabPanel("Data", DT::dataTableOutput("data")),
-                   tabPanel("Read Me",includeMarkdown("readme.md"))
+                   tabPanel("Information",includeMarkdown("readme.md"))
 
         )
     )
