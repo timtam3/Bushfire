@@ -12,6 +12,6 @@ Because some data in specific weather sations are not available, We chose the mo
 
 ### Help
 ---
-In case you observe any incorrect infomation or you have more accurate or additional information that could be updated or you have any recommentdations that could help us to improve the app, please do not hesitate to contact us. 
+In case you observe any incorrect information or you have more accurate or additional information that could be updated or you have any recommendations that could help us to improve the app, please do not hesitate to contact us. 
 
 
